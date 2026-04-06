@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'NozdorClientStripe.zip'
+      - 'version.txt'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: |
+          if [ -f version.txt ]; then
+            VERSION=$(cat version.txt | tr -d '[:space:]')
+          else
+            VERSION="1.0.0"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "TAG=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Delete existing tag if exists
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git push origin :refs/tags/v${{ steps.version.outputs.VERSION }} 2>/dev/null || true
+
+      - name: Create tag
+        run: |
+          git tag v${{ steps.version.outputs.VERSION }}
+          git push origin v${{ steps.version.outputs.VERSION }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: "NozdorClientStripe v${{ steps.version.outputs.VERSION }}"
+          body: |
+            ## NozdorClientStripe v${{ steps.version.outputs.VERSION }}
+
+            ### Установка
+            Скачай `NozdorClientStripe.zip`, распакуй и запусти `NozdorClientStripe.exe`.
+
+            ### Обновление
+            Программа обновится автоматически при следующем запуске.
+          files: NozdorClientStripe.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify license server
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          TAG="${{ steps.version.outputs.TAG }}"
+          REPO="${{ github.repository }}"
+          URL="https://github.com/$REPO/releases/download/$TAG/NozdorClientStripe.zip"
+          BODY="version=$VERSION&url=$URL&required=0"
+          CREDS=$(echo -n "admin:${{ secrets.ADMIN_PASSWORD }}" | base64)
+          curl -s -X POST \
+            "${{ secrets.LICENSE_SERVER_URL }}/admin/set-version" \
+            -H "Authorization: Basic $CREDS" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "$BODY" && echo "OK: v$VERSION -> $URL" || echo "Warning: server notify failed"
