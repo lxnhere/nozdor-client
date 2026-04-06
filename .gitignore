@@ -1,5 +1,6 @@
 # Игнорируем всё
 *
+.cursor/
 
 # Кроме workflow, zip-релиза, версии и readme
 !.gitignore
