@@ -54,17 +54,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Notify license server
-        run: |
-          VERSION="${{ steps.version.outputs.VERSION }}"
-          TAG="${{ steps.version.outputs.TAG }}"
-          REPO="${{ github.repository }}"
-          URL="https://github.com/$REPO/releases/download/$TAG/NozdorClientStripe.zip"
-          BODY="version=$VERSION&url=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$URL', safe=''))")&required=0"
-          CREDS=$(echo -n "admin:${{ secrets.ADMIN_PASSWORD }}" | base64 -w 0)
-          RESPONSE=$(curl -s -w "\nHTTP:%{http_code}" -X POST \
-            "${{ secrets.LICENSE_SERVER_URL }}/admin/set-version" \
-            -H "Authorization: Basic $CREDS" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "version=$VERSION&url=$URL&required=0")
-          echo "Response: $RESPONSE"
+      - name: Done
+        run: echo "Release v${{ steps.version.outputs.VERSION }} published. Server will auto-detect via GitHub API."
