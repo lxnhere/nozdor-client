@@ -1,10 +1,11 @@
 # Игнорируем всё
 *
 
-# Кроме workflow, zip-релиза и версии
+# Кроме workflow, zip-релиза, версии и readme
 !.gitignore
 !.github/
 !.github/workflows/
 !.github/workflows/release.yml
 !NozdorClientStripe.zip
 !version.txt
+!README.md
