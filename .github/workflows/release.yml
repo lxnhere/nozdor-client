@@ -20,24 +20,20 @@ jobs:
       - name: Read version
         id: version
         run: |
-          if [ -f version.txt ]; then
-            VERSION=$(cat version.txt | tr -d '[:space:]')
-          else
-            VERSION="1.0.0"
-          fi
+          VERSION=$(cat version.txt | tr -d '[:space:]')
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "TAG=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
 
-      - name: Delete existing tag if exists
+      - name: Delete existing release and tag if exists
         run: |
-          git config user.email "actions@github.com"
-          git config user.name "GitHub Actions"
-          git push origin :refs/tags/v${{ steps.version.outputs.VERSION }} 2>/dev/null || true
-
-      - name: Create tag
-        run: |
-          git tag v${{ steps.version.outputs.VERSION }}
-          git push origin v${{ steps.version.outputs.VERSION }}
+          TAG="v${{ steps.version.outputs.VERSION }}"
+          # Удаляем старый релиз если есть
+          gh release delete "$TAG" --yes 2>/dev/null || true
+          # Удаляем старый тег если есть
+          git push origin ":refs/tags/$TAG" 2>/dev/null || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -64,10 +60,11 @@ jobs:
           TAG="${{ steps.version.outputs.TAG }}"
           REPO="${{ github.repository }}"
           URL="https://github.com/$REPO/releases/download/$TAG/NozdorClientStripe.zip"
-          BODY="version=$VERSION&url=$URL&required=0"
-          CREDS=$(echo -n "admin:${{ secrets.ADMIN_PASSWORD }}" | base64)
-          curl -s -X POST \
+          BODY="version=$VERSION&url=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$URL', safe=''))")&required=0"
+          CREDS=$(echo -n "admin:${{ secrets.ADMIN_PASSWORD }}" | base64 -w 0)
+          RESPONSE=$(curl -s -w "\nHTTP:%{http_code}" -X POST \
             "${{ secrets.LICENSE_SERVER_URL }}/admin/set-version" \
             -H "Authorization: Basic $CREDS" \
             -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "$BODY" && echo "OK: v$VERSION -> $URL" || echo "Warning: server notify failed"
+            -d "version=$VERSION&url=$URL&required=0")
+          echo "Response: $RESPONSE"
