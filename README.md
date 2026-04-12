@@ -1,11 +1,13 @@
 # NozdorClientStripe
 
-WoW 3.3.5a client utility.
+Утилита для клиента **World of Warcraft 3.3.5a**: работа с визуалами спеллов (strip / фикс графики в MPQ).
 
-[Download latest release](https://github.com/lxnhere/nozdor-client/releases/latest)
+**У каждого пользователя есть одно бесплатное демо-применение** «ПРИМЕНИТЬ» на один компьютер: можно один раз проверить эффект на своём железе без ключа. Повторно бесплатное демо на том же ПК не выдаётся — дальше нужен платный ключ.
 
-## Demo
+[Скачать последний релиз](https://github.com/lxnhere/nozdor-client/releases/latest)
 
-Comparison **with and without** the visual patch (YouTube):
+## Демонстрация
 
-[![Demo: with vs without patch](https://img.youtube.com/vi/EXYJA_D7RDw/maxresdefault.jpg)](https://youtu.be/EXYJA_D7RDw)
+Сравнение клиента **с патчем и без** (YouTube):
+
+[![Демо: с патчем и без](https://img.youtube.com/vi/EXYJA_D7RDw/maxresdefault.jpg)](https://youtu.be/EXYJA_D7RDw)
