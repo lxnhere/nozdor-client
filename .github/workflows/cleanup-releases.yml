@@ -1,6 +1,7 @@
 name: Cleanup old releases
 
-# Удаляет все GitHub Releases, кроме указанного тега (по умолчанию v1.0.50).
+# Ручная зачистка: оставить один тег (по умолчанию v1.0.50).
+# Обычно не нужен: при каждом push в main workflow release.yml сам оставляет только текущий релиз.
 # Запуск: Actions → Cleanup old releases → Run workflow.
 on:
   workflow_dispatch:
